@@ -82,7 +82,7 @@ def add_klines(symbol:str, tf:str, raw_klines:list[list]) -> requests.Response:
 def main_loop():
     while True:
         try:
-            symbols = get_symbols()[0:3]
+            symbols = get_symbols()
             k = 1
             whole_length = len(symbols) * len(timeframes_in_minutes.keys())
             for symbol, tf in product(symbols, timeframes_in_minutes.keys()):
