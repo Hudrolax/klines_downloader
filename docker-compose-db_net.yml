@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        - DEV=${DEV}
+    volumes:
+      - ./:/app
+    environment:
+      - SERVER_HOST=${SERVER_HOST}
+      - SERVER_PORT=${SERVER_PORT}
+    networks:
+      - db_net
+
+networks:
+  db_net:
+    external: true
