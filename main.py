@@ -17,14 +17,14 @@ url = f'http://{SERVER_HOST}:{SERVER_PORT}/klines'
 logger = logging.getLogger(__name__)
 
 timeframes_in_minutes = {
-    '1m': 1,
-    '5m': 5,
+    # '1m': 1,
+    # '5m': 5,
     '15m': 15,
-    '1h': 60,
-    '4h': 240,
-    '1d': 1440,
-    '1w': 10080,
-    '1M': 43200,
+    # '1h': 60,
+    # '4h': 240,
+    # '1d': 1440,
+    # '1w': 10080,
+    # '1M': 43200,
 }
 
 def get_min_max_dates_for_symbol_tf(symbol:str, tf:str) -> tuple[int, int] | tuple[None, None]:
