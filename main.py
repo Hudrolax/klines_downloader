@@ -92,7 +92,7 @@ def main_loop():
                     while True:
                         try:
                             min_date, max_date = get_min_max_dates_for_symbol_tf(symbol, tf)
-                            break_date = int(datetime.strptime('01.01.2000', "%d.%m.%Y").timestamp() * 1000)
+                            break_date = int(datetime.strptime('01.01.2020', "%d.%m.%Y").timestamp() * 1000)
                             if min_date is not None and  min_date <= break_date:
                                 break
 
