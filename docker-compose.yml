@@ -11,3 +11,8 @@ services:
     environment:
       - SERVER_HOST=${SERVER_HOST}
       - SERVER_PORT=${SERVER_PORT}
+    restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "1"
