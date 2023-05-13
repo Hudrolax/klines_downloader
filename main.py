@@ -27,7 +27,8 @@ timeframes_in_minutes = {
     # '1M': 43200,
 }
 
-def get_min_max_dates_for_symbol_tf(symbol:str, tf:str) -> tuple[int, int] | tuple[None, None]:
+
+def get_min_max_dates_for_symbol_tf(symbol: str, tf: str) -> tuple[int, int] | tuple[None, None]:
     """Function gets min and max dates is already downloaded klines
 
     Args:
@@ -50,7 +51,8 @@ def get_min_max_dates_for_symbol_tf(symbol:str, tf:str) -> tuple[int, int] | tup
 
     return (first_date, last_date)
 
-def add_klines(symbol:str, tf:str, raw_klines:list[list]) -> requests.Response:
+
+def add_klines(symbol: str, tf: str, raw_klines: list[list]) -> requests.Response:
     """Adding klines to DB
 
     Args:
@@ -64,20 +66,21 @@ def add_klines(symbol:str, tf:str, raw_klines:list[list]) -> requests.Response:
     klines_dict = []
     for kline in raw_klines:
         kline_dict = dict(
-            symbol = symbol,
-            timeframe = tf,
-            open_time = kline[0],
-            close_time = kline[6],
-            open = float(kline[1]),
-            high = float(kline[2]),
-            low = float(kline[3]),
-            close = float(kline[4]),
-            volume = float(kline[5]),
-            trades = kline[8],
+            symbol=symbol,
+            timeframe=tf,
+            open_time=kline[0],
+            close_time=kline[6],
+            open=float(kline[1]),
+            high=float(kline[2]),
+            low=float(kline[3]),
+            close=float(kline[4]),
+            volume=float(kline[5]),
+            trades=kline[8],
         )
         klines_dict.append(kline_dict)
-    
+
     return requests.post(url, json=klines_dict)
+
 
 def main_loop():
     while True:
@@ -88,12 +91,23 @@ def main_loop():
             for symbol, tf in product(symbols, timeframes_in_minutes.keys()):
                 logger.info(f'Download history for {symbol}_{tf}')
 
-                def download_klines_data(symbol, tf, date_kwarg, k, whole_length):
+                min_date, max_date = get_min_max_dates_for_symbol_tf(
+                    symbol, tf)
+
+                def download_klines_data(
+                    symbol: str,
+                    tf: str,
+                    date_kwarg: str,
+                    k: int,
+                    whole_length: int,
+                    min_date: int | None,
+                    max_date: int | None,
+                ):
                     while True:
                         try:
-                            min_date, max_date = get_min_max_dates_for_symbol_tf(symbol, tf)
-                            break_date = int(datetime.strptime('01.01.2020', "%d.%m.%Y").timestamp() * 1000)
-                            if min_date is not None and  min_date <= break_date:
+                            break_date = int(datetime.strptime(
+                                '01.01.2020', "%d.%m.%Y").timestamp() * 1000)
+                            if min_date is not None and date_kwarg == 'min_date' and min_date <= break_date:
                                 break
 
                             kwargs = {}
@@ -102,15 +116,23 @@ def main_loop():
                             elif date_kwarg == 'max_date':
                                 kwargs['start_date'] = max_date
                             else:
-                                raise ValueError(f'Unexpected param name: {date_kwarg}')
+                                raise ValueError(
+                                    f'Unexpected param name: {date_kwarg}')
 
                             raw_klines = download_klines(symbol, tf, **kwargs)
                             if len(raw_klines) == 0:
                                 break
                             add_klines(symbol, tf, raw_klines)
 
-                            date_f = datetime.fromtimestamp(raw_klines[0][0] / 1000).strftime('%d.%m.%Y %H:%M:%S')
-                            logger.info(f'added {len(raw_klines)} klines of {symbol}_{tf} date {date_f} ({k}/{whole_length})')
+                            if date_kwarg == 'min_date':
+                                min_date = raw_klines[0][0]
+                            elif date_kwarg == 'max_date':
+                                max_date = raw_klines[-1][0]
+
+                            date_f = datetime.fromtimestamp(
+                                raw_klines[0][0] / 1000).strftime('%d.%m.%Y %H:%M:%S')
+                            logger.info(
+                                f'added {len(raw_klines)} klines of {symbol}_{tf} date {date_f} ({k}/{whole_length})')
                         except (OSError) as ex:
                             logger.error(ex)
 
@@ -118,11 +140,11 @@ def main_loop():
 
                 # download older klines
                 logger.info('download older klines...')
-                download_klines_data(symbol, tf, 'min_date', k, whole_length)
+                download_klines_data(symbol, tf, 'min_date', k, whole_length, min_date, max_date)
 
                 # download newest klines
                 logger.info('download newest klines...')
-                download_klines_data(symbol, tf, 'max_date', k, whole_length)
+                download_klines_data(symbol, tf, 'max_date', k, whole_length, min_date, max_date)
 
                 k += 1
         except OSError as ex:
@@ -130,6 +152,7 @@ def main_loop():
 
         logger.info('All klines downloaded.')
         sleep(1)
+
 
 if __name__ == '__main__':
     main_loop()
