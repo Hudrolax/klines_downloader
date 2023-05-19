@@ -70,11 +70,11 @@ def add_klines(symbol: str, tf: str, raw_klines: list[list]) -> requests.Respons
             timeframe=tf,
             open_time=kline[0],
             close_time=kline[6],
-            open=float(kline[1]),
-            high=float(kline[2]),
-            low=float(kline[3]),
-            close=float(kline[4]),
-            volume=float(kline[5]),
+            open=kline[1],
+            high=kline[2],
+            low=kline[3],
+            close=kline[4],
+            volume=kline[5],
             trades=kline[8],
         )
         klines_dict.append(kline_dict)
@@ -136,7 +136,7 @@ def main_loop():
                         except (OSError) as ex:
                             logger.error(ex)
 
-                        sleep(1)
+                        sleep(0.5)
 
                 # download older klines
                 logger.info('download older klines...')
@@ -151,7 +151,6 @@ def main_loop():
             logger.error(ex)
 
         logger.info('All klines downloaded.')
-        sleep(1)
 
 
 if __name__ == '__main__':
