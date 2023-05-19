@@ -1,4 +1,8 @@
 from binance.spot import Spot
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_symbols() -> list[str]:
@@ -50,10 +54,14 @@ def download_klines(
     if end_date:
         kwargs['endTime'] = end_date-1
 
-    klines = client.klines(
-        symbol,
-        interval,
-        limit=limit,
-        **kwargs
-    )
+    try:
+        klines = client.klines(
+            symbol,
+            interval,
+            limit=limit,
+            **kwargs
+        )
+    except Exception as ex:
+        logger.error(f'symbol {symbol}, tf {interval}, kwargs: {kwargs}')
+        raise ex
     return klines
