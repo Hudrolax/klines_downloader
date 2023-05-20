@@ -1,2 +1,2 @@
-binance-connector
+binance-connector==2.0.0
 requests
